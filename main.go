@@ -55,12 +55,18 @@ func main() {
 	databaseAPI.CreateCategoriesTable(database)
 	databaseAPI.CreateCategories(database)
 	databaseAPI.CreateCategoriesIcons(database)
+	databaseAPI.CreateCommentLikesTable(database)
+	databaseAPI.CreateCommentDislikesTable(database)
+	databaseAPI.CreatePostImagesTable(database)
+	
+	// Créer le dossier pour stocker les images des posts
+	os.MkdirAll("public/uploads/posts", os.ModePerm)
 
 	webAPI.SetDatabase(database)
 
 	fs := http.FileServer(http.Dir("public"))
 	router := http.NewServeMux()
-	fmt.Println("Starting server on port 8000")
+	fmt.Println("Starting server on port http://localhost:3030/")
 
 	router.HandleFunc("/", webAPI.Index)
 	router.HandleFunc("/register", webAPI.Register)
@@ -74,7 +80,17 @@ func main() {
 	router.HandleFunc("/api/createpost", webAPI.CreatePostApi)
 	router.HandleFunc("/api/comments", webAPI.CommentsApi)
 	router.HandleFunc("/api/vote", webAPI.VoteApi)
-
+	router.HandleFunc("/api/deletepost", webAPI.DeletePostHandler)
+    router.HandleFunc("/profile", webAPI.DisplayProfile)
+    router.HandleFunc("/api/editprofile", webAPI.EditProfileHandler)
+    router.HandleFunc("/api/changepassword", webAPI.ChangePasswordHandler)
+    router.HandleFunc("/api/uploadprofileimage", webAPI.UploadProfileImageHandler)
+	router.HandleFunc("/api/editcomment", webAPI.EditCommentHandler)
 	router.Handle("/public/", http.StripPrefix("/public/", fs))
-	http.ListenAndServe(":8000", router)
+	router.HandleFunc("/editpost", webAPI.EditPostPage)
+	router.HandleFunc("/api/editpost", webAPI.EditPostHandler)
+	router.HandleFunc("/api/deletecomment", webAPI.DeleteCommentHandler)
+	router.HandleFunc("/api/commentlike", webAPI.CommentLikeApi)
+
+	http.ListenAndServe(":3030", router)
 }
